@@ -46,7 +46,10 @@ class _RidePrefFormState extends State<RidePrefForm> {
   @override
   void initState() {
     super.initState();
+    _initializeForm();
+  }
 
+  void _initializeForm() {
     if (widget.initialPreference != null) {
       RidePreference current = widget.initialPreference!;
       departure = current.departure;
@@ -62,6 +65,15 @@ class _RidePrefFormState extends State<RidePrefForm> {
     }
   }
 
+  @override
+  void didUpdateWidget(RidePrefForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialPreference != widget.initialPreference) {
+      setState(() {
+        _initializeForm();
+      });
+    }
+  }
   // ----------------------------------
   // Handle events
   // ----------------------------------

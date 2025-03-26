@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../model/ride/ride_filter.dart';
+import '../../../providers/rides_preference_provider.dart';
 import 'widgets/ride_pref_bar.dart';
-import '../../../service/ride_prefs_service.dart';
 
 import '../../../model/ride/ride.dart';
 import '../../../model/ride/ride_pref.dart';
@@ -15,30 +16,17 @@ import 'widgets/rides_tile.dart';
 ///  The Ride Selection screen allow user to select a ride, once ride preferences have been defined.
 ///  The screen also allow user to re-define the ride preferences and to activate some filters.
 ///
-class RidesScreen extends StatefulWidget {
+class RidesScreen extends StatelessWidget {
   const RidesScreen({super.key});
 
-  @override
-  State<RidesScreen> createState() => _RidesScreenState();
-}
-
-class _RidesScreenState extends State<RidesScreen> {
-  RidePreference get currentPreference =>
-      RidePrefService.instance.currentPreference!;
-
-  RideFilter currentFilter = RideFilter();
-
-  List<Ride> get matchingRides =>
-      RidesService.instance.getRidesFor(currentPreference, currentFilter);
-
-  void onBackPressed() {
+  void onBackPressed(BuildContext context) {
     // 1 - Back to the previous view
     Navigator.of(context).pop();
   }
 
-  onRidePrefSelected(RidePreference newPreference) async {}
-
-  void onPreferencePressed() async {
+  void onPreferencePressed(
+      BuildContext context, RidePreference currentPreference) async {
+    final ridePrefProvider = context.read<RidesPreferenceProvider>();
     // Open a modal to edit the ride preferences
     RidePreference? newPreference = await Navigator.of(
       context,
@@ -50,10 +38,9 @@ class _RidesScreenState extends State<RidesScreen> {
 
     if (newPreference != null) {
       // 1 - Update the current preference
-      RidePrefService.instance.setCurrentPreference(newPreference);
+      ridePrefProvider.setCurrentPreference(newPreference);
 
       // 2 -   Update the state   -- TODO MAKE IT WITH STATE MANAGEMENT
-      setState(() {});
     }
   }
 
@@ -61,6 +48,12 @@ class _RidesScreenState extends State<RidesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ridePrefProvider = context.watch<RidesPreferenceProvider>();
+    RideFilter currentFilter = RideFilter();
+    RidePreference currentPreference = ridePrefProvider.currentPreference!;
+    List<Ride> matchingRides =
+        RidesService.instance.getRidesFor(currentPreference, currentFilter);
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(
@@ -73,8 +66,9 @@ class _RidesScreenState extends State<RidesScreen> {
             // Top search Search bar
             RidePrefBar(
               ridePreference: currentPreference,
-              onBackPressed: onBackPressed,
-              onPreferencePressed: onPreferencePressed,
+              onBackPressed: () => onBackPressed(context),
+              onPreferencePressed: () =>
+                  onPreferencePressed(context, currentPreference),
               onFilterPressed: onFilterPressed,
             ),
 
