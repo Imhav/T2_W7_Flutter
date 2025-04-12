@@ -55,11 +55,11 @@ class RidePrefService {
   }
 
   // Past preferences
-  List<RidePreference> getPastPreferences() {
-    return repository.getPastPreferences();
+  Future<List<RidePreference>> getPastPreferences() async {
+    return await repository.getPastPreferences();
   }
 
-  void addPreference(RidePreference preference) {
-    return repository.addPreference(preference);
+  Future<void> addPreference(RidePreference preference) async {
+    return await repository.addPreference(preference);
   }
 }

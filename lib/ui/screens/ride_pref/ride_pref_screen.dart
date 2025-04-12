@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:week_3_blabla_project/providers/rides_preference_provider.dart';
 import '../../../model/ride/ride_pref.dart';
+import '../../../providers/async_value.dart';
+import '../../../providers/rides_preference_provider.dart';
 import '../../theme/theme.dart';
 import '../../../utils/animations_util.dart';
 import '../rides/rides_screen.dart';
@@ -18,24 +19,21 @@ const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 class RidePrefScreen extends StatelessWidget {
   const RidePrefScreen({super.key});
 
-  void onRidePrefSelected(
-      BuildContext context, RidePreference newPreference) async {
+  onRidePrefSelected(RidePreference newPreference, BuildContext context) async {
     // 1 - Update the current preference
-
     final prefProvider = context.read<RidesPreferenceProvider>();
     prefProvider.setCurrentPreference(newPreference);
+
     // 2 - Navigate to the rides screen (with a buttom to top animation)
     await Navigator.of(context)
         .push(AnimationUtils.createBottomToTopRoute(RidesScreen()));
-
-    // 3 - After wait  - Update the state   -- TODO MAKE IT WITH STATE MANAGEMENT
   }
 
   @override
   Widget build(BuildContext context) {
     final prefProvider = context.watch<RidesPreferenceProvider>();
     RidePreference? currentRidePreference = prefProvider.currentPreference;
-    List<RidePreference> pastPreferences = prefProvider.preferencesHistory;
+
     return Stack(
       children: [
         // 1 - Background  Image
@@ -63,26 +61,16 @@ class RidePrefScreen extends StatelessWidget {
                   // 2.1 Display the Form to input the ride preferences
                   RidePrefForm(
                     initialPreference: currentRidePreference,
-                    onSubmit: (newPerference) {
-                      onRidePrefSelected(context, newPerference);
+                    onSubmit: (preference) {
+                      onRidePrefSelected(preference, context);
                     },
                   ),
                   SizedBox(height: BlaSpacings.m),
 
                   // 2.2 Optionally display a list of past preferences
                   SizedBox(
-                    height: 200, // Set a fixed height
-                    child: ListView.builder(
-                      shrinkWrap: true, // Fix ListView height issue
-                      physics: AlwaysScrollableScrollPhysics(),
-                      itemCount: pastPreferences.length,
-                      itemBuilder: (ctx, index) => RidePrefHistoryTile(
-                        ridePref: pastPreferences[index],
-                        onPressed: () =>
-                            onRidePrefSelected(context, pastPreferences[index]),
-                      ),
-                    ),
-                  ),
+                      height: 200, // Set a fixed height
+                      child: _buildPastRidePrefListView(prefProvider, context)),
                 ],
               ),
             ),
@@ -90,6 +78,35 @@ class RidePrefScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildPastRidePrefListView(
+      RidesPreferenceProvider provider, BuildContext context) {
+    final ridePrefValue = provider.pastPreference;
+
+    switch (ridePrefValue.state) {
+      case AsyncValueState.loading:
+        return Center(child: CircularProgressIndicator());
+
+      case AsyncValueState.error:
+        return Text('Error: ${ridePrefValue.error}');
+
+      case AsyncValueState.success:
+        if (ridePrefValue.data == null || ridePrefValue.data!.isEmpty) {
+          return Center(child: Text("No past preferences found."));
+        }
+
+        return ListView.builder(
+          shrinkWrap: true, // Fix ListView height issue
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: ridePrefValue.data!.length,
+          itemBuilder: (ctx, index) => RidePrefHistoryTile(
+            ridePref: ridePrefValue.data![index],
+            onPressed: () =>
+                onRidePrefSelected(ridePrefValue.data![index], context),
+          ),
+        );
+    }
   }
 }
 

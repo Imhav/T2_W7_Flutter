@@ -40,7 +40,7 @@ class RidesScreen extends StatelessWidget {
       // 1 - Update the current preference
       ridePrefProvider.setCurrentPreference(newPreference);
 
-      // 2 -   Update the state   -- TODO MAKE IT WITH STATE MANAGEMENT
+   
     }
   }
 
