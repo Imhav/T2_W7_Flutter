@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:week_3_blabla_project/model/ride/ride_pref.dart';
 
-import '../repository/ride_preferences_repository.dart';
+import '../../data/repository/ride_preferences_repository.dart';
 import 'async_value.dart';
 
 class RidesPreferenceProvider extends ChangeNotifier {

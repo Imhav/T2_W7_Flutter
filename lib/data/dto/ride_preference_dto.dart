@@ -1,7 +1,7 @@
 
 import 'package:week_3_blabla_project/model/ride/ride_pref.dart';
 
-import '../../data/location_dto.dart';
+import 'location_dto.dart';
 
 class RidePreferenceDto {
   static Map<String, dynamic> toJson(RidePreference model) {

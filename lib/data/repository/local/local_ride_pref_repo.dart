@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:week_3_blabla_project/model/ride/ride_pref.dart';
 
-import '../../data/ride_preference_dto.dart';
+import '../../dto/ride_preference_dto.dart';
 import '../ride_preferences_repository.dart';
 
 class LocalRidePrefsRepository implements RidePreferencesRepository {
